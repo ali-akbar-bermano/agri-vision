@@ -1,0 +1,6 @@
+{
+  "name": "Agri-Vision",
+  "description": "Asisten diagnosis pertanian berbasis AI Vision untuk daun dan kondisi tanah dengan rekomendasi terstruktur, ekspor PDF, dan narasi suara.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

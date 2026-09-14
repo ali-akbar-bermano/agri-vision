@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agri-Vision — Pertanian Cerdas, Panen Berkualitas</title>
+  <meta name="description" content="Diagnosis penyakit tanaman dan kelembapan tanah secara cerdas dan akurat dengan AI Vision. Lindungi panen Anda secara berkelanjutan.">
+
+  <!-- Google Fonts: Plus Jakarta Sans & Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Poppins', 'sans-serif'],
+            display: ['Poppins', '"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            forest: {
+              50: '#F0F7F2',
+              100: '#DFEFE4',
+              200: '#C0DFC9',
+              300: '#94C7A3',
+              400: '#61A777',
+              500: '#3D8A55',
+              600: '#2E6F43',
+              700: '#265837',
+              800: '#20462D',
+              900: '#143823',
+              950: '#0B2215',
+            },
+            leaf: {
+              400: '#4ADE80',
+              500: '#22C55E',
+              600: '#16A34A',
+            }
+          },
+          keyframes: {
+            floatSlow: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            floatReverse: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(8px)' },
+            },
+            pulseSubtle: {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0.8' },
+            }
+          },
+          animation: {
+            'float-slow': 'floatSlow 5s ease-in-out infinite',
+            'float-delayed': 'floatSlow 6s ease-in-out 1.5s infinite',
+            'float-reverse': 'floatReverse 5.5s ease-in-out infinite',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Glassmorphism Utilities */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+    }
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    /* Drag over state */
+    .drag-over {
+      border-color: #22C55E !important;
+      background-color: #F0FDF4 !important;
+      transform: scale(1.01);
+    }
+  </style>
+</head>
+<body class="bg-[#FCFDFD] text-slate-800 antialiased selection:bg-emerald-100 selection:text-forest-900 flex flex-col min-h-screen">
+
+  <!-- ==========================================
+       1. BAGIAN NAVIGASI (NAVBAR)
+       ========================================== -->
+  <header class="sticky top-0 z-50 w-full transition-all duration-300 glass-nav border-b border-emerald-900/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- Logo Agri-Vision di Kiri -->
+        <a href="#beranda" class="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-forest-600 rounded-xl p-1">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-forest-800 to-forest-950 flex items-center justify-center text-white shadow-md shadow-forest-900/20 group-hover:scale-105 transition-transform duration-300">
+            <!-- Icon Daun / Tunas -->
+            <svg class="w-6 h-6 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="font-display font-extrabold text-2xl tracking-tight text-forest-950">Agri<span class="text-emerald-600">Vision</span></span>
+            <span class="text-[10px] font-semibold tracking-wider uppercase text-forest-600 -mt-1">Smart AI Agriculture</span>
+          </div>
+        </a>
+
+        <!-- Menu di Tengah (Desktop) -->
+        <nav class="hidden md:flex items-center gap-1 bg-emerald-50/70 p-1.5 rounded-full border border-emerald-100/60 shadow-inner">
+          <a href="#beranda" class="px-5 py-2 text-sm font-semibold text-forest-900 bg-white rounded-full shadow-sm transition-all">Beranda</a>
+          <a href="#cara-kerja" class="px-5 py-2 text-sm font-medium text-slate-600 hover:text-forest-800 hover:bg-white/60 rounded-full transition-all">Cara Kerja</a>
+          <a href="#tentang-kami" class="px-5 py-2 text-sm font-medium text-slate-600 hover:text-forest-800 hover:bg-white/60 rounded-full transition-all">Tentang Kami</a>
+        </nav>
+
+        <!-- Tombol CTA 'Mulai Diagnosis' di Kanan -->
+        <div class="hidden sm:flex items-center gap-3">
+          <a href="#upload-section" class="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold text-white bg-forest-900 hover:bg-forest-950 active:scale-95 rounded-2xl shadow-lg shadow-forest-900/25 hover:shadow-xl hover:shadow-forest-900/30 transition-all duration-200">
+            <span>Mulai Diagnosis</span>
+            <svg class="w-4 h-4 text-emerald-300 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </a>
+        </div>
+
+        <!-- Tombol Hamburger Mobile -->
+        <div class="flex md:hidden">
+          <button id="mobile-menu-btn" type="button" class="p-2.5 rounded-xl text-slate-700 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-forest-600">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Dropdown Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-emerald-100 bg-white/95 backdrop-blur-lg px-4 pt-3 pb-5 space-y-2">
+      <a href="#beranda" class="block px-4 py-2.5 rounded-xl font-medium text-forest-900 bg-emerald-50">Beranda</a>
+      <a href="#cara-kerja" class="block px-4 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-emerald-50/50">Cara Kerja</a>
+      <a href="#tentang-kami" class="block px-4 py-2.5 rounded-xl font-medium text-slate-600 hover:bg-emerald-50/50">Tentang Kami</a>
+      <div class="pt-2">
+        <a href="#upload-section" class="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl font-bold text-white bg-forest-900 shadow-md">
+          <span>Mulai Diagnosis</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================
+       2. BAGIAN PAHLAWAN (HERO SECTION) - SPLIT 50/50
+       ========================================== -->
+  <section id="beranda" class="relative pt-6 pb-16 lg:py-20 overflow-hidden">
+    <!-- Dekorasi Latar Belakang Halus -->
+    <div class="absolute top-0 right-0 -z-10 w-96 h-96 bg-emerald-100/50 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-10 left-0 -z-10 w-80 h-80 bg-teal-100/40 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-14 items-center">
+        
+        <!-- KOLOM KIRI: TEKS & AKSI UTAMA -->
+        <div class="flex flex-col space-y-6">
+          
+          <!-- Badge Subtitel Startup Modern -->
+          <div class="inline-flex items-center gap-2 self-start px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 shadow-sm">
+            <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
+            <span class="text-xs font-bold tracking-wide uppercase text-forest-800">Teknologi Gemini Vision AI 1.5</span>
+          </div>
+
+          <!-- Headline H1 Sangat Besar & Tebal -->
+          <h1 class="font-display text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight text-forest-950 leading-[1.12]">
+            Pertanian Cerdas, <br class="hidden sm:inline">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-forest-800 via-emerald-600 to-teal-600">
+              Panen Berkualitas.
+            </span>
+          </h1>
+
+          <!-- Subtitle Singkat Teknologi AI untuk Petani -->
+          <p class="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed">
+            Asisten agronomi cerdas berbasis visi komputer untuk mendeteksi penyakit daun, malnutrisi, dan kelembapan tanah seketika. Solusi presisi langsung dari genggaman petani.
+          </p>
+
+          <!-- AREA UNGGAH (DRAG & DROP) -->
+          <div id="upload-section" class="pt-2">
+            <div id="drop-zone" class="relative group p-6 sm:p-7 rounded-3xl border-2 border-dashed border-emerald-300 hover:border-emerald-600 bg-white/90 hover:bg-emerald-50/40 shadow-xl shadow-emerald-950/5 transition-all duration-300 cursor-pointer">
+              
+              <!-- Input File Tersembunyi -->
+              <input type="file" id="file-input" accept="image/*" class="hidden">
+              <input type="file" id="camera-input" accept="image/*" capture="environment" class="hidden">
+
+              <div class="flex flex-col items-center text-center space-y-4">
+                
+                <!-- Ikon Area Unggah -->
+                <div class="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 group-hover:scale-110 group-hover:bg-emerald-100 transition-all duration-300">
+                  <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                  </svg>
+                </div>
+
+                <!-- Teks Panduan -->
+                <div>
+                  <h3 class="text-base font-bold text-forest-950">Unggah Foto Daun atau Permukaan Tanah</h3>
+                  <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-sm">
+                    Tarik dan lepaskan foto ke sini, atau gunakan opsi praktis di bawah:
+                  </p>
+                </div>
+
+                <!-- Dua Tombol Aksi: Ambil Foto & Pilih Galeri -->
+                <div class="flex flex-wrap items-center justify-center gap-3 w-full pt-1" onclick="event.stopPropagation()">
+                  
+                  <!-- Tombol Ambil Foto (Kamera) -->
+                  <button type="button" id="btn-camera" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-forest-900 hover:bg-forest-950 rounded-2xl shadow-md active:scale-95 transition-all">
+                    <svg class="w-4 h-4 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                    </svg>
+                    <span>Ambil Foto</span>
+                  </button>
+
+                  <!-- Tombol Pilih Galeri -->
+                  <button type="button" id="btn-gallery" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-forest-900 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 rounded-2xl active:scale-95 transition-all">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                    </svg>
+                    <span>Pilih Galeri</span>
+                  </button>
+                  
+                </div>
+
+                <span class="text-[11px] text-slate-400">Mendukung format JPG, PNG, WEBP (Maks. 10MB)</span>
+              </div>
+            </div>
+
+            <!-- Preview Box Terpilih (Default Hidden) -->
+            <div id="preview-box" class="hidden mt-4 p-4 bg-white rounded-3xl border border-emerald-100 shadow-xl flex items-center justify-between gap-4">
+              <div class="flex items-center gap-3.5 overflow-hidden">
+                <img id="preview-img" src="" alt="Preview" class="w-14 h-14 rounded-2xl object-cover border border-emerald-100 shadow-sm">
+                <div class="overflow-hidden text-left">
+                  <p id="preview-filename" class="text-sm font-bold text-forest-950 truncate">foto-tanaman.jpg</p>
+                  <p id="preview-filesize" class="text-xs text-slate-400">Siap dianalisis</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="btn-analyze-now" type="button" class="px-4 py-2 text-xs sm:text-sm font-bold text-white bg-forest-900 hover:bg-forest-950 rounded-xl shadow transition-all">
+                  Analisis AI
+                </button>
+                <button id="btn-cancel-preview" type="button" class="p-2 text-slate-400 hover:text-red-500 rounded-xl hover:bg-red-50 transition-all">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Deretan Metrik Sederhana -->
+          <div class="pt-2 border-t border-slate-100 grid grid-cols-3 gap-3">
+            <div class="p-3 bg-white/70 rounded-2xl border border-slate-100/80 text-center sm:text-left">
+              <p class="font-display text-xl sm:text-2xl font-extrabold text-forest-900">98.4%</p>
+              <p class="text-[11px] sm:text-xs font-semibold text-slate-500 mt-0.5">Akurasi Diagnosis</p>
+            </div>
+            <div class="p-3 bg-white/70 rounded-2xl border border-slate-100/80 text-center sm:text-left">
+              <p class="font-display text-xl sm:text-2xl font-extrabold text-forest-900">&lt; 3 Detik</p>
+              <p class="text-[11px] sm:text-xs font-semibold text-slate-500 mt-0.5">Waktu Respons AI</p>
+            </div>
+            <div class="p-3 bg-white/70 rounded-2xl border border-slate-100/80 text-center sm:text-left">
+              <p class="font-display text-xl sm:text-2xl font-extrabold text-forest-900">24/7</p>
+              <p class="text-[11px] sm:text-xs font-semibold text-slate-500 mt-0.5">Siaga Lapangan</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- KOLOM KANAN: VISUAL DENGAN FLOATING CARDS -->
+        <div class="relative flex justify-center items-center lg:justify-end">
+          
+          <!-- Wrapper Visual Gambar Besar -->
+          <div class="relative w-full max-w-lg lg:max-w-none">
+            
+            <!-- Gambar Utama Lahan Pertanian Berkualitas Tinggi -->
+            <div class="relative aspect-[4/3] sm:aspect-[16/11] rounded-3xl overflow-hidden shadow-2xl shadow-emerald-950/20 border-4 border-white">
+              <img 
+                src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1200&q=80" 
+                alt="Lahan Pertanian Berkelanjutan Agri-Vision" 
+                class="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-forest-950/60 via-transparent to-transparent"></div>
+              
+              <!-- Badge Lokasi/Kondisi di Pojok Foto -->
+              <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white/95 text-xs font-medium px-3 py-1.5 rounded-xl bg-forest-950/40 backdrop-blur-md">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  Lahan Presisi Aktif
+                </span>
+                <span>Gemini Vision AI Engine</span>
+              </div>
+            </div>
+
+            <!-- EFEK MENGAMBANG (3 FLOATING GLASSMORPHISM CARDS) -->
+            
+            <!-- Floating Card 1: Sampel Cepat Padi (Kiri Atas) -->
+            <div 
+              onclick="loadSample('Padi', 'https://images.unsplash.com/photo-1536700503339-1e4b06520771?auto=format&fit=crop&w=300&q=80', 'Hawar Daun Bakteri (Xanthomonas)', 'Sedang')"
+              class="absolute -top-4 -left-2 sm:-left-6 glass-card p-3 sm:p-3.5 rounded-2xl shadow-xl shadow-forest-950/10 flex items-center gap-3 cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300 animate-float-slow z-20 group"
+              title="Klik untuk coba sampel diagnosis Padi"
+            >
+              <div class="w-11 h-11 rounded-xl overflow-hidden bg-emerald-100 flex-shrink-0 border border-white">
+                <img src="https://images.unsplash.com/photo-1536700503339-1e4b06520771?auto=format&fit=crop&w=200&q=80" alt="Padi" class="w-full h-full object-cover">
+              </div>
+              <div class="text-left">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-forest-800">Coba</span>
+                  <p class="text-xs font-bold text-forest-950">Sampel Cepat: Padi</p>
+                </div>
+                <p class="text-[11px] text-slate-500 font-medium">Bakterisida + NPK Seimbang</p>
+              </div>
+            </div>
+
+            <!-- Floating Card 2: Sampel Cepat Cabai (Kanan Tengah) -->
+            <div 
+              onclick="loadSample('Cabai', 'https://images.unsplash.com/photo-1596797882870-8c33deeac224?auto=format&fit=crop&w=300&q=80', 'Antraknosa / Patek Jamur', 'Berat')"
+              class="absolute top-1/2 -right-3 sm:-right-6 -translate-y-1/2 glass-card p-3 sm:p-3.5 rounded-2xl shadow-xl shadow-forest-950/10 flex items-center gap-3 cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300 animate-float-delayed z-20 group"
+              title="Klik untuk coba sampel diagnosis Cabai"
+            >
+              <div class="w-11 h-11 rounded-xl overflow-hidden bg-red-100 flex-shrink-0 border border-white">
+                <img src="https://images.unsplash.com/photo-1596797882870-8c33deeac224?auto=format&fit=crop&w=200&q=80" alt="Cabai" class="w-full h-full object-cover">
+              </div>
+              <div class="text-left">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">Coba</span>
+                  <p class="text-xs font-bold text-forest-950">Sampel Cepat: Cabai</p>
+                </div>
+                <p class="text-[11px] text-slate-500 font-medium">Fungisida Mankozeb 15g</p>
+              </div>
+            </div>
+
+            <!-- Floating Card 3: Sampel Cepat Tomat (Kiri Bawah) -->
+            <div 
+              onclick="loadSample('Tomat', 'https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&w=300&q=80', 'Defisiensi Klorofil & Kalsium', 'Ringan')"
+              class="absolute -bottom-5 left-4 sm:left-8 glass-card p-3 sm:p-3.5 rounded-2xl shadow-xl shadow-forest-950/10 flex items-center gap-3 cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300 animate-float-reverse z-20 group"
+              title="Klik untuk coba sampel diagnosis Tomat"
+            >
+              <div class="w-11 h-11 rounded-xl overflow-hidden bg-amber-100 flex-shrink-0 border border-white">
+                <img src="https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&w=200&q=80" alt="Tomat" class="w-full h-full object-cover">
+              </div>
+              <div class="text-left">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-forest-800">Coba</span>
+                  <p class="text-xs font-bold text-forest-950">Sampel Cepat: Tomat</p>
+                </div>
+                <p class="text-[11px] text-slate-500 font-medium">Siram 300ml + Kalsium Nitrat</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       3. BAGIAN KEDUA (INFORMASI TAMBAHAN)
+       Tata Letak Terbelah: Kiri Penjelasan, Kanan 3 Kartu Vertikal
+       ========================================== -->
+  <section id="cara-kerja" class="py-20 bg-gradient-to-b from-white via-emerald-50/20 to-white relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+        
+        <!-- SISI KIRI: TEKS "Kenapa Memilih Agri-Vision?" -->
+        <div class="lg:col-span-5 flex flex-col space-y-6 lg:sticky lg:top-28">
+          
+          <div class="inline-flex items-center gap-2 self-start px-3.5 py-1.5 rounded-full bg-emerald-100/70 border border-emerald-200">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-forest-900">Solusi Berkelanjutan</span>
+          </div>
+
+          <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-forest-950 tracking-tight leading-tight">
+            Kenapa Memilih <br class="hidden sm:inline">
+            <span class="text-emerald-700">Agri-Vision?</span>
+          </h2>
+
+          <p class="text-slate-600 text-base leading-relaxed">
+            Metode pertanian konvensional sering menghadapi keterlambatan deteksi penyakit dan takaran pupuk yang tidak proporsional. Agri-Vision menggabungkan ilmu agronomi presisi dengan kapabilitas AI Vision untuk memutus rantai kerugian panen.
+          </p>
+
+          <!-- Poin-Poin Manfaat Utama -->
+          <div class="space-y-4 pt-2">
+            <div class="flex items-start gap-3.5">
+              <div class="w-8 h-8 rounded-xl bg-emerald-100 text-forest-800 flex items-center justify-center flex-shrink-0 font-bold">
+                ✓
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-forest-950">Analisis Berstandar Agronomi</h4>
+                <p class="text-xs text-slate-500 mt-0.5">Sistem prompt terkurasi mengidentifikasi jenis objek (daun/tanah), tingkat keparahan, dan persentase keyakinan.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3.5">
+              <div class="w-8 h-8 rounded-xl bg-emerald-100 text-forest-800 flex items-center justify-center flex-shrink-0 font-bold">
+                ✓
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-forest-950">Ramah Lingkungan & Zero Waste</h4>
+                <p class="text-xs text-slate-500 mt-0.5">Mencegah overdosis pestisida sintetis melalui takaran miligram yang terukur dan rekomendasi bahan organik.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3.5">
+              <div class="w-8 h-8 rounded-xl bg-emerald-100 text-forest-800 flex items-center justify-center flex-shrink-0 font-bold">
+                ✓
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-forest-950">Terbukti Mengurangi Biaya Operasional</h4>
+                <p class="text-xs text-slate-500 mt-0.5">Petani menghemat hingga 35% pengeluaran pupuk dan mempertahankan kesehatan mikroorganisme tanah.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4">
+            <a href="#upload-section" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-forest-900 hover:bg-forest-950 text-white text-sm font-bold shadow-lg transition-all">
+              <span>Coba Deteksi Tanaman Anda</span>
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </a>
+          </div>
+
+        </div>
+
+        <!-- SISI KANAN: 3 KARTU VERTIKAL TINGGI -->
+        <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-6">
+          
+          <!-- KARTU 1: Efisiensi Pupuk -->
+          <div class="group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col">
+            <div class="relative h-48 overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1592417817098-8f3d6eb22509?auto=format&fit=crop&w=600&q=80" 
+                alt="Efisiensi Pupuk Pertanian" 
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-forest-950/60 via-transparent to-transparent"></div>
+              <span class="absolute bottom-3 left-3 text-[11px] font-bold text-white px-2.5 py-1 rounded-lg bg-forest-900/80 backdrop-blur-sm">Nutrisi Tanah</span>
+            </div>
+            <div class="p-5 flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="font-display text-lg font-bold text-forest-950 group-hover:text-emerald-700 transition-colors">
+                  Efisiensi Pupuk
+                </h3>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                  Rekomendasi takaran tepat hingga satuan gram (NPK, Urea, atau Organik). Mengurangi limpasan kimia berbahaya ke sumber air dan menjaga pH tanah seimbang.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-slate-100 flex items-center text-xs font-bold text-emerald-700">
+                <span>Hemat Biaya 35%</span>
+                <span class="ml-auto">→</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- KARTU 2: Deteksi Dini Hama -->
+          <div class="group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col">
+            <div class="relative h-48 overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?auto=format&fit=crop&w=600&q=80" 
+                alt="Deteksi Dini Hama dan Penyakit Tanaman" 
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-forest-950/60 via-transparent to-transparent"></div>
+              <span class="absolute bottom-3 left-3 text-[11px] font-bold text-white px-2.5 py-1 rounded-lg bg-forest-900/80 backdrop-blur-sm">Proteksi Dini</span>
+            </div>
+            <div class="p-5 flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="font-display text-lg font-bold text-forest-950 group-hover:text-emerald-700 transition-colors">
+                  Deteksi Dini Hama
+                </h3>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                  Kenali gejala awal bercak klorofil, jamur mikotik, atau serangan serangga sebelum menyebar ke seluruh petak lahan. Tindakan isolasi dini menyelamatkan panen.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-slate-100 flex items-center text-xs font-bold text-emerald-700">
+                <span>Cegah Gagal Panen</span>
+                <span class="ml-auto">→</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- KARTU 3: Hemat Air -->
+          <div class="group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col">
+            <div class="relative h-48 overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1563514227147-6d2ff665a6a0?auto=format&fit=crop&w=600&q=80" 
+                alt="Irigasi Presisi dan Hemat Air" 
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-forest-950/60 via-transparent to-transparent"></div>
+              <span class="absolute bottom-3 left-3 text-[11px] font-bold text-white px-2.5 py-1 rounded-lg bg-forest-900/80 backdrop-blur-sm">Konservasi Air</span>
+            </div>
+            <div class="p-5 flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="font-display text-lg font-bold text-forest-950 group-hover:text-emerald-700 transition-colors">
+                  Hemat Air
+                </h3>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                  Analisis visual tanah mendeteksi hidrasi permukaan dan memberikan takaran siram ideal dalam mililiter (ml). Menghindari genangan air berlebih penyebab busuk akar.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-slate-100 flex items-center text-xs font-bold text-emerald-700">
+                <span>Irigasi Presisi</span>
+                <span class="ml-auto">→</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==========================================
+       MODAL HASIL SIMULASI DIAGNOSIS AI
+       ========================================== -->
+  <div id="result-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-forest-950/60 backdrop-blur-md">
+    <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-emerald-100 p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+      
+      <!-- Tombol Tutup -->
+      <button onclick="closeModal()" class="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+
+      <!-- Status Header -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-forest-800 flex items-center justify-center">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Hasil Diagnosis AI Gemini</span>
+          <h3 id="modal-crop-name" class="text-xl font-display font-extrabold text-forest-950">Padi (Oryza Sativa)</h3>
+        </div>
+      </div>
+
+      <!-- Preview Image in Modal -->
+      <div class="mt-4 rounded-2xl overflow-hidden aspect-video bg-slate-100 border border-slate-100">
+        <img id="modal-img" src="" alt="Diagnosis Image" class="w-full h-full object-cover">
+      </div>
+
+      <!-- Diagnosis Details -->
+      <div class="mt-5 space-y-4">
+        
+        <div class="p-4 bg-emerald-50/70 rounded-2xl border border-emerald-100">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-forest-800">Diagnosis AI:</span>
+            <span id="modal-severity" class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">Sedang</span>
+          </div>
+          <p id="modal-diagnosis" class="text-sm font-semibold text-forest-950 mt-1.5 leading-snug">
+            Terdeteksi bercak hawar daun bakteri pada ujung tepi daun muda.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+            <span class="text-[11px] font-bold text-slate-500 uppercase">Rekomendasi Air</span>
+            <p id="modal-water" class="text-lg font-bold text-forest-900 mt-0.5">350 ml</p>
+          </div>
+          <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+            <span class="text-[11px] font-bold text-slate-500 uppercase">Rekomendasi Pupuk</span>
+            <p id="modal-fertilizer" class="text-xs font-bold text-forest-900 mt-1">Bakterisida (20g)</p>
+          </div>
+        </div>
+
+        <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-left">
+          <span class="text-[11px] font-bold text-slate-500 uppercase">Catatan Agronomis</span>
+          <p id="modal-notes" class="text-xs text-slate-600 mt-1 leading-relaxed">
+            Kurangi penggunaan urea nitrogen tinggi sementara waktu untuk menekan kolonisasi patogen.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="mt-6 flex gap-3">
+        <button onclick="closeModal()" class="flex-1 py-3 text-sm font-bold text-white bg-forest-900 hover:bg-forest-950 rounded-2xl transition-all shadow-md">
+          Tutup & Analisis Baru
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==========================================
+       FOOTER (TENTANG KAMI)
+       ========================================== -->
+  <footer id="tentang-kami" class="mt-auto bg-forest-950 text-white border-t border-forest-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-forest-800 flex items-center justify-center text-emerald-400 font-bold">
+            🌱
+          </div>
+          <span class="font-display font-extrabold text-xl tracking-tight">Agri<span class="text-emerald-400">Vision</span></span>
+        </div>
+        <p class="text-xs text-emerald-200/70 text-center sm:text-right">
+          © 2026 Agri-Vision. Solusi Cerdas Ketahanan Pangan & Pertanian Presisi Berkelanjutan.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==========================================
+       INTERACTIVE JAVASCRIPT
+       ========================================== -->
+  <script>
+    // Referensi Elemen DOM
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const cameraInput = document.getElementById('camera-input');
+    const btnCamera = document.getElementById('btn-camera');
+    const btnGallery = document.getElementById('btn-gallery');
+    const previewBox = document.getElementById('preview-box');
+    const previewImg = document.getElementById('preview-img');
+    const previewFilename = document.getElementById('preview-filename');
+    const previewFilesize = document.getElementById('preview-filesize');
+    const btnCancelPreview = document.getElementById('btn-cancel-preview');
+    const btnAnalyzeNow = document.getElementById('btn-analyze-now');
+
+    const resultModal = document.getElementById('result-modal');
+    const modalCropName = document.getElementById('modal-crop-name');
+    const modalImg = document.getElementById('modal-img');
+    const modalSeverity = document.getElementById('modal-severity');
+    const modalDiagnosis = document.getElementById('modal-diagnosis');
+    const modalWater = document.getElementById('modal-water');
+    const modalFertilizer = document.getElementById('modal-fertilizer');
+    const modalNotes = document.getElementById('modal-notes');
+
+    // Mobile Hamburger Menu Toggle
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // Pemicu Tombol Aksi Upload
+    btnCamera.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cameraInput.click();
+    });
+
+    btnGallery.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fileInput.click();
+    });
+
+    dropZone.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    // Drag and Drop Events
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add('drag-over');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove('drag-over');
+      }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files && files[0]) {
+        handleFileSelect(files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        handleFileSelect(this.files[0]);
+      }
+    });
+
+    cameraInput.addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        handleFileSelect(this.files[0]);
+      }
+    });
+
+    // Tangani File Terpilih & Buat Pratinjau
+    let currentSelectedFile = null;
+    function handleFileSelect(file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Mohon pilih file gambar yang valid (JPG, PNG, WEBP).');
+        return;
+      }
+      currentSelectedFile = file;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewImg.src = e.target.result;
+        previewFilename.textContent = file.name;
+        previewFilesize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB • Siap Dianalisis';
+        previewBox.classList.remove('hidden');
+        previewBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    btnCancelPreview.addEventListener('click', () => {
+      previewBox.classList.add('hidden');
+      previewImg.src = '';
+      currentSelectedFile = null;
+      fileInput.value = '';
+      cameraInput.value = '';
+    });
+
+    // Analisis Gambar Terpilih
+    btnAnalyzeNow.addEventListener('click', () => {
+      if (!currentSelectedFile && !previewImg.src) return;
+      btnAnalyzeNow.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg> Memproses...
+      `;
+      btnAnalyzeNow.disabled = true;
+
+      setTimeout(() => {
+        btnAnalyzeNow.innerHTML = 'Analisis AI';
+        btnAnalyzeNow.disabled = false;
+        showModalResult({
+          crop: 'Tanaman Terdeteksi',
+          image: previewImg.src,
+          diagnosis: 'Kondisi klorofil terpantau sehat dengan indikasi kelembapan tanah mencukupi.',
+          severity: 'Ringan',
+          water: '250 ml',
+          fertilizer: 'Pupuk Organik Cair (10 ml)',
+          notes: 'Pertahankan kelembapan sekitar dan lakukan pemantauan berkala setiap 3 hari.'
+        });
+      }, 1200);
+    });
+
+    // Fungsi Klik Kartu Sampel Cepat Mengambang
+    function loadSample(crop, imageUrl, diag, severity) {
+      showModalResult({
+        crop: crop,
+        image: imageUrl,
+        diagnosis: diag,
+        severity: severity,
+        water: crop === 'Padi' ? '400 ml' : crop === 'Cabai' ? '200 ml' : '300 ml',
+        fertilizer: crop === 'Padi' ? 'Bakterisida Cu + NPK (20g)' : crop === 'Cabai' ? 'Fungisida Mankozeb (15g)' : 'Kalsium Nitrat (10g)',
+        notes: `Simulasi deteksi cepat pada komoditas ${crop}. Gunakan takaran air dan pupuk sesuai instruksi.`
+      });
+    }
+
+    function showModalResult(data) {
+      modalCropName.textContent = data.crop;
+      modalImg.src = data.image;
+      modalDiagnosis.textContent = data.diagnosis;
+      modalSeverity.textContent = data.severity;
+      
+      if (data.severity === 'Berat') {
+        modalSeverity.className = 'text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-red-100 text-red-800';
+      } else if (data.severity === 'Sedang') {
+        modalSeverity.className = 'text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800';
+      } else {
+        modalSeverity.className = 'text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800';
+      }
+
+      modalWater.textContent = data.water;
+      modalFertilizer.textContent = data.fertilizer;
+      modalNotes.textContent = data.notes;
+      resultModal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      resultModal.classList.add('hidden');
+    }
+
+    // Tutup modal jika klik backdrop luar
+    resultModal.addEventListener('click', (e) => {
+      if (e.target === resultModal) closeModal();
+    });
+  </script>
+</body>
+</html>

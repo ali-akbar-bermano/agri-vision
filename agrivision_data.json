@@ -1,0 +1,115 @@
+{
+  "analyses": [
+    {
+      "id": 5,
+      "image_hash": "93858049ab38a3f7f97cc760f59a52244b3b307ae9ed37953aaeba6225b0f160",
+      "image_path": "/uploads/1789395057412_89b28f75.jpeg",
+      "jenis_tanaman": "Umum / Otomatis Deteksi",
+      "jenis_objek": "daun",
+      "diagnosis": "Gejala serangga/jamur embun tepung (Leveillula taurica) yang menyebabkan klorosis keputihan dan bercak kuning pada daun tanaman cabai",
+      "tingkat_keparahan": "Sedang",
+      "rekomendasi_air_ml": 500,
+      "rekomendasi_pupuk": {
+        "jenis": "NPK 16-16-16",
+        "takaran_gram": 5
+      },
+      "rekomendasi_pupuk_jenis": "NPK 16-16-16",
+      "rekomendasi_pupuk_gram": 5,
+      "catatan_tambahan": "Semprotkan fungisida berbahan aktif Heksakonazol atau Triadimefon untuk mengendalikan jamur. Pangkas daun yang mengalami gejala parah dan pastikan sirkulasi udara di sekitar tanaman cukup baik.",
+      "tingkat_keyakinan": 88,
+      "latitude": -3.768641107924305,
+      "longitude": 102.2866568682732,
+      "created_at": "2026-09-14 14:11:05",
+      "is_cached": false
+    },
+    {
+      "id": 4,
+      "image_hash": "6e6af8fa23c78243ed7bb9422b6d174aeec233471efbc135880d24ec12a5a346",
+      "image_path": "/uploads/1789394989055_3139e4d8.jpeg",
+      "jenis_tanaman": "Umum / Otomatis Deteksi",
+      "jenis_objek": "daun",
+      "diagnosis": "Penyakit bercak cokelat (Brown spot) pada tanaman padi yang disebabkan oleh jamur Bipolaris oryzae",
+      "tingkat_keparahan": "Berat",
+      "rekomendasi_air_ml": 500,
+      "rekomendasi_pupuk": {
+        "jenis": "NPK 16-16-16 dan Kalium (KCl)",
+        "takaran_gram": 20
+      },
+      "rekomendasi_pupuk_jenis": "NPK 16-16-16 dan Kalium (KCl)",
+      "rekomendasi_pupuk_gram": 20,
+      "catatan_tambahan": "Aplikasikan fungisida berbahan aktif mankozeb, difenokonazol, atau azoksistrobin sesuai dosis anjuran. Tingkatkan pemberian pupuk Kalium (K) dan Silika (Si) untuk memperkuat ketahanan dinding sel tanaman, serta jaga kelembapan lahan secara stabil.",
+      "tingkat_keyakinan": 92,
+      "latitude": -3.768641107924305,
+      "longitude": 102.2866568682732,
+      "created_at": "2026-09-14 14:10:20",
+      "is_cached": false
+    },
+    {
+      "id": 3,
+      "image_hash": "5a42707ddc82c65e67a82b3888564f94df1bfb3338368e6f53220b0cc364d19d",
+      "image_path": "/uploads/1789394922941_17ce60be.jpeg",
+      "jenis_tanaman": "Umum / Otomatis Deteksi",
+      "jenis_objek": "daun",
+      "diagnosis": "Analisis visual pada Umum / Otomatis Deteksi: menunjukkan indikasi stres klorofil ringan hingga bercak mikotik awal pada jaringan mesofil.",
+      "tingkat_keparahan": "Sedang",
+      "rekomendasi_air_ml": 300,
+      "rekomendasi_pupuk": {
+        "jenis": "NPK 16-16-16 + Pupuk Hayati Trichoderma",
+        "takaran_gram": 20
+      },
+      "rekomendasi_pupuk_jenis": "NPK 16-16-16 + Pupuk Hayati Trichoderma",
+      "rekomendasi_pupuk_gram": 20,
+      "catatan_tambahan": "Semprotkan fungisida hayati di pagi hari dan pastikan drainase bedengan tidak tergenang.",
+      "tingkat_keyakinan": 82,
+      "latitude": -3.7685288872832374,
+      "longitude": 102.28656560455627,
+      "created_at": "2026-09-14 14:08:54",
+      "is_cached": false
+    },
+    {
+      "id": 2,
+      "image_hash": "46d5420ecf6b9e1a46370adcbac440e224f391f05c305076a704edf82cad7c1b",
+      "image_path": "/uploads/1789394876451_c85ac107.jpeg",
+      "jenis_tanaman": "Umum / Otomatis Deteksi",
+      "jenis_objek": "daun",
+      "diagnosis": "Analisis visual pada Umum / Otomatis Deteksi: menunjukkan indikasi stres klorofil ringan hingga bercak mikotik awal pada jaringan mesofil.",
+      "tingkat_keparahan": "Sedang",
+      "rekomendasi_air_ml": 300,
+      "rekomendasi_pupuk": {
+        "jenis": "NPK 16-16-16 + Pupuk Hayati Trichoderma",
+        "takaran_gram": 20
+      },
+      "rekomendasi_pupuk_jenis": "NPK 16-16-16 + Pupuk Hayati Trichoderma",
+      "rekomendasi_pupuk_gram": 20,
+      "catatan_tambahan": "Semprotkan fungisida hayati di pagi hari dan pastikan drainase bedengan tidak tergenang.",
+      "tingkat_keyakinan": 82,
+      "latitude": -3.7685288872832374,
+      "longitude": 102.28656560455627,
+      "created_at": "2026-09-14 14:08:00",
+      "is_cached": false
+    },
+    {
+      "id": 1,
+      "image_hash": "15a115733acf0a700787cebd1951dc58edca3291c789e186254cc6407244517b",
+      "image_path": "/uploads/1789394854417_27c485e4.jpeg",
+      "jenis_tanaman": "Umum / Otomatis Deteksi",
+      "jenis_objek": "daun",
+      "diagnosis": "Analisis visual pada Umum / Otomatis Deteksi: menunjukkan indikasi stres klorofil ringan hingga bercak mikotik awal pada jaringan mesofil.",
+      "tingkat_keparahan": "Sedang",
+      "rekomendasi_air_ml": 300,
+      "rekomendasi_pupuk": {
+        "jenis": "NPK 16-16-16 + Pupuk Hayati Trichoderma",
+        "takaran_gram": 20
+      },
+      "rekomendasi_pupuk_jenis": "NPK 16-16-16 + Pupuk Hayati Trichoderma",
+      "rekomendasi_pupuk_gram": 20,
+      "catatan_tambahan": "Semprotkan fungisida hayati di pagi hari dan pastikan drainase bedengan tidak tergenang.",
+      "tingkat_keyakinan": 82,
+      "latitude": -3.768641107924305,
+      "longitude": 102.2866568682732,
+      "created_at": "2026-09-14 14:07:38",
+      "is_cached": false
+    }
+  ],
+  "feedbacks": []
+}
