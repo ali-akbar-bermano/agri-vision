@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircle2, ArrowRight } from 'lucide-react';
+import localImages from '../assets/images';
 
 interface FeaturesSectionProps {
   onStartDiagnosis?: () => void;
@@ -97,7 +98,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onStartDiagnos
             <div className="group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col">
               <div className="relative h-48 overflow-hidden">
                 <img 
-                  src="https://images.unsplash.com/photo-1592417817098-8f3d6eb22509?auto=format&fit=crop&w=600&q=80" 
+                  src={localImages.featurePupukTanah} 
                   alt="Efisiensi Pupuk Pertanian" 
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
@@ -126,7 +127,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onStartDiagnos
             <div className="group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col">
               <div className="relative h-48 overflow-hidden">
                 <img 
-                  src="https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?auto=format&fit=crop&w=600&q=80" 
+                  src={localImages.featureHamaDaun} 
                   alt="Deteksi Dini Hama dan Penyakit Tanaman" 
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
@@ -155,7 +156,7 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ onStartDiagnos
             <div className="group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col">
               <div className="relative h-48 overflow-hidden">
                 <img 
-                  src="https://images.unsplash.com/photo-1563514227147-6d2ff665a6a0?auto=format&fit=crop&w=600&q=80" 
+                  src={localImages.featureIrigasiAir} 
                   alt="Irigasi Presisi dan Hemat Air" 
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />

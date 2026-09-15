@@ -2,6 +2,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Camera, Image as ImageIcon, UploadCloud, MapPin, X, Sparkles, AlertCircle, RefreshCw, ArrowRight } from 'lucide-react';
 import { PRESET_SAMPLES } from '../presetData';
 import { PresetSample } from '../types';
+import { CameraCaptureModal } from './CameraCaptureModal';
+import localImages from '../assets/images';
 
 interface UploadSectionProps {
   onAnalyze: (payload: {
@@ -30,8 +32,8 @@ export const UploadSection: React.FC<UploadSectionProps> = ({ onAnalyze, isLoadi
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isCameraModalOpen, setIsCameraModalOpen] = useState<boolean>(false);
 
-  const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Init Geolocation
@@ -162,7 +164,6 @@ export const UploadSection: React.FC<UploadSectionProps> = ({ onAnalyze, isLoadi
     setCompressedBlob(null);
     setCompressionStats(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
-    if (cameraInputRef.current) cameraInputRef.current.value = '';
   };
 
   const handleSelectPreset = (sample: PresetSample) => {
@@ -224,7 +225,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({ onAnalyze, isLoadi
             <div className="inline-flex items-center gap-2 self-start px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 shadow-xs">
               <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
               <span className="text-xs font-bold tracking-wide uppercase text-[#143823]">
-                Teknologi Gemini Vision AI
+                Analisis Visi AI Pertanian
               </span>
             </div>
 
@@ -257,19 +258,11 @@ export const UploadSection: React.FC<UploadSectionProps> = ({ onAnalyze, isLoadi
                     : 'border-emerald-300 hover:border-emerald-600 bg-white/90 hover:bg-emerald-50/40 shadow-xl shadow-emerald-950/5'
                 }`}
               >
-                {/* Input File Tersembunyi */}
+                {/* Input File Tersembunyi untuk Galeri */}
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/jpg"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                <input
-                  ref={cameraInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
                   onChange={handleFileChange}
                   className="hidden"
                 />
@@ -295,10 +288,10 @@ export const UploadSection: React.FC<UploadSectionProps> = ({ onAnalyze, isLoadi
                     className="flex flex-wrap items-center justify-center gap-3 w-full pt-1"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {/* Tombol Ambil Foto (Kamera) */}
+                    {/* Tombol Ambil Foto (Kamera Langsung) */}
                     <button
                       type="button"
-                      onClick={() => cameraInputRef.current?.click()}
+                      onClick={() => setIsCameraModalOpen(true)}
                       className="inline-flex items-center gap-2 px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-[#143823] hover:bg-[#0B2215] rounded-2xl shadow-md active:scale-95 transition-all cursor-pointer"
                     >
                       <Camera className="w-4 h-4 text-emerald-300" />
@@ -381,7 +374,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({ onAnalyze, isLoadi
                       <p className="text-xs text-slate-400">
                         {compressionStats
                           ? `${compressionStats.compKb} KB (Hemat ${compressionStats.percentSaved}%) • Siap Analisis`
-                          : 'Siap dianalisis dengan Gemini AI'}
+                          : 'Siap dianalisis dengan AI Agronomi'}
                       </p>
                     </div>
                   </div>
@@ -453,7 +446,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({ onAnalyze, isLoadi
               {/* Foto Besar Lahan Pertanian Berkualitas Tinggi */}
               <div className="relative aspect-[4/3] sm:aspect-[16/11] rounded-3xl overflow-hidden shadow-2xl shadow-emerald-950/20 border-4 border-white">
                 <img
-                  src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=1200&q=80"
+                  src={localImages.heroFarmField}
                   alt="Lahan Pertanian Berkelanjutan Agri-Vision"
                   className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700"
                 />
@@ -465,7 +458,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({ onAnalyze, isLoadi
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     Lahan Presisi Aktif
                   </span>
-                  <span>Gemini Vision AI Engine</span>
+                  <span>AI Agronomi Presisi</span>
                 </div>
               </div>
 
@@ -484,8 +477,8 @@ export const UploadSection: React.FC<UploadSectionProps> = ({ onAnalyze, isLoadi
               >
                 <div className="w-11 h-11 rounded-xl overflow-hidden bg-emerald-100 flex-shrink-0 border border-white">
                   <img
-                    src="https://images.unsplash.com/photo-1536700503339-1e4b06520771?auto=format&fit=crop&w=200&q=80"
-                    alt="Padi"
+                    src={localImages.samplePadiLeaf}
+                    alt="Sampel Daun Padi"
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -511,8 +504,8 @@ export const UploadSection: React.FC<UploadSectionProps> = ({ onAnalyze, isLoadi
               >
                 <div className="w-11 h-11 rounded-xl overflow-hidden bg-red-100 flex-shrink-0 border border-white">
                   <img
-                    src="https://images.unsplash.com/photo-1596797882870-8c33deeac224?auto=format&fit=crop&w=200&q=80"
-                    alt="Cabai"
+                    src={localImages.sampleCabaiLeaf}
+                    alt="Sampel Daun Cabai"
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -538,8 +531,8 @@ export const UploadSection: React.FC<UploadSectionProps> = ({ onAnalyze, isLoadi
               >
                 <div className="w-11 h-11 rounded-xl overflow-hidden bg-amber-100 flex-shrink-0 border border-white">
                   <img
-                    src="https://images.unsplash.com/photo-1592841200221-a6898f307baa?auto=format&fit=crop&w=200&q=80"
-                    alt="Tomat"
+                    src={localImages.sampleTomatLeaf}
+                    alt="Sampel Daun Tomat"
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -559,6 +552,13 @@ export const UploadSection: React.FC<UploadSectionProps> = ({ onAnalyze, isLoadi
 
         </div>
       </div>
+
+      {/* Modal Kamera Langsung */}
+      <CameraCaptureModal
+        isOpen={isCameraModalOpen}
+        onClose={() => setIsCameraModalOpen(false)}
+        onCapture={(file) => handleProcessFile(file)}
+      />
     </section>
   );
 };

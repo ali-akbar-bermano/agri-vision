@@ -399,7 +399,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // 2. POST /api/analyze — Main analysis endpoint
-app.post('/api/analyze', upload.single('image'), async (req, res) => {
+app.post('/api/analyze', upload.single('image') as any, async (req: any, res: any) => {
   try {
     let imageBuffer: Buffer | null = null;
     let mimeType = 'image/jpeg';
@@ -721,48 +721,348 @@ app.get('/api/export/:id', (req, res) => {
   res.send(html);
 });
 
-// 7. GET /api/python-files — List files in agri-vision/ folder
-app.get('/api/python-files', (req, res) => {
-  const baseDir = path.join(process.cwd(), 'agri-vision');
-  if (!fs.existsSync(baseDir)) {
-    return res.json({ files: [] });
+// ==========================================================
+// 7. API CUACA INDONESIA REAL-TIME (BMKG & METEOROLOGI NASIONAL)
+// ==========================================================
+
+const INDONESIA_AGRI_REGIONS = [
+  { id: 'brebes', name: 'Brebes', detail: 'Sentra Bawang Merah & Cabai', province: 'Jawa Tengah', lat: -6.8703, lng: 109.0435, adm4: '33.29.09.2001' },
+  { id: 'lembang', name: 'Lembang / Bandung Barat', detail: 'Hortikultura Sayuran Dataran Tinggi', province: 'Jawa Barat', lat: -6.8153, lng: 107.6181, adm4: '32.17.06.2001' },
+  { id: 'karawang', name: 'Karawang', detail: 'Lumbung Padi Nasional', province: 'Jawa Barat', lat: -6.3072, lng: 107.3014, adm4: '32.15.01.2001' },
+  { id: 'malang', name: 'Malang / Batu', detail: 'Sentra Apel & Sayuran', province: 'Jawa Timur', lat: -7.8712, lng: 112.5271, adm4: '35.79.01.1001' },
+  { id: 'wonosobo', name: 'Wonosobo / Dieng', detail: 'Sentra Kentang & Sayuran', province: 'Jawa Tengah', lat: -7.3622, lng: 109.9073, adm4: '33.07.01.2001' },
+  { id: 'kediri', name: 'Kediri / Pare', detail: 'Sentra Jagung & Cabai', province: 'Jawa Timur', lat: -7.8166, lng: 112.0119, adm4: '35.71.01.1001' },
+  { id: 'tabanan', name: 'Tabanan', detail: 'Lumbung Padi & Hortikultura Bali', province: 'Bali', lat: -8.5411, lng: 115.1252, adm4: '51.02.01.2001' },
+  { id: 'karo', name: 'Berastagi / Karo', detail: 'Sentra Hortikultura Dataran Tinggi', province: 'Sumatera Utara', lat: 3.1902, lng: 98.5085, adm4: '12.06.01.2001' },
+  { id: 'bengkulu', name: 'Rejang Lebong / Curup', detail: 'Sentra Sayuran Bengkulu', province: 'Bengkulu', lat: -3.4680, lng: 102.5280, adm4: '17.02.01.1001' },
+  { id: 'sleman', name: 'Sleman / Bantul', detail: 'Padi & Hortikultura DIY', province: 'D.I. Yogyakarta', lat: -7.7155, lng: 110.3556, adm4: '34.04.01.2001' },
+  { id: 'pinrang', name: 'Pinrang / Sidrap', detail: 'Lumbung Padi Sulawesi Selatan', province: 'Sulawesi Selatan', lat: -3.7918, lng: 119.6472, adm4: '73.15.01.1001' },
+  { id: 'lampung', name: 'Lampung Selatan', detail: 'Padi & Palawija', province: 'Lampung', lat: -5.7121, lng: 105.5901, adm4: '18.01.01.2001' },
+  { id: 'bima', name: 'Bima / Sumbawa', detail: 'Sentra Bawang Merah NTB', province: 'Nusa Tenggara Barat', lat: -8.4606, lng: 118.7265, adm4: '52.06.01.1001' },
+  { id: 'jakarta', name: 'Jakarta Pusat (Rujukan BMKG)', detail: 'Stasiun Pusat Meteorologi', province: 'DKI Jakarta', lat: -6.1754, lng: 106.8272, adm4: '31.71.01.1001' }
+];
+
+const WMO_ID_MAP: Record<number, { text: string; icon: string }> = {
+  0: { text: 'Cerah', icon: 'sun' },
+  1: { text: 'Cerah Berawan', icon: 'cloud-sun' },
+  2: { text: 'Sebagian Berawan', icon: 'cloud-sun' },
+  3: { text: 'Berawan Tebal', icon: 'cloud' },
+  45: { text: 'Berkabut (Embun Tebal)', icon: 'cloud-fog' },
+  48: { text: 'Berkabut Tebal', icon: 'cloud-fog' },
+  51: { text: 'Gerimis Ringan', icon: 'cloud-drizzle' },
+  53: { text: 'Gerimis Sedang', icon: 'cloud-drizzle' },
+  55: { text: 'Gerimis Lebat', icon: 'cloud-drizzle' },
+  61: { text: 'Hujan Ringan', icon: 'cloud-rain' },
+  63: { text: 'Hujan Sedang', icon: 'cloud-rain' },
+  65: { text: 'Hujan Lebat', icon: 'cloud-rain' },
+  80: { text: 'Hujan Lokal Ringan', icon: 'cloud-rain' },
+  81: { text: 'Hujan Deras Sporadis', icon: 'cloud-rain' },
+  82: { text: 'Hujan Sangat Deras', icon: 'cloud-rain' },
+  95: { text: 'Hujan Petir & Badai', icon: 'cloud-lightning' },
+  96: { text: 'Hujan Petir & Butiran Es', icon: 'cloud-lightning' },
+  99: { text: 'Hujan Badai Disertai Petir', icon: 'cloud-lightning' }
+};
+
+function getDegreeToCardinalId(degree: number): string {
+  const directions = [
+    'Utara (U)', 'Timur Laut (TL)', 'Timur (T)', 'Tenggara (TG)',
+    'Selatan (S)', 'Barat Daya (BD)', 'Barat (B)', 'Barat Laut (BL)'
+  ];
+  const idx = Math.round(((degree % 360) / 45)) % 8;
+  return directions[idx];
+}
+
+function calculateSprayWindow(
+  temp: number,
+  humidity: number,
+  windSpeed: number,
+  rainProb: number,
+  precipAmount: number = 0,
+  weatherCode: number = 0
+) {
+  const reasons: string[] = [];
+
+  // Risiko hujan / sedang hujan
+  if (rainProb >= 50 || precipAmount > 0.2 || (weatherCode >= 51 && weatherCode <= 99)) {
+    reasons.push(
+      rainProb >= 50
+        ? `Potensi hujan mencapai ${rainProb}%. Cairan pestisida/pupuk berisiko tinggi tercuci air hujan sebelum terserap sempurna.`
+        : 'Sedang berlangsung presipitasi/hujan. Penyemprotan saat hujan akan membuang bahan aktif.'
+    );
+    return {
+      status: 'avoid' as const,
+      title: 'Tunda Penyemprotan (Risiko Terbilas Air Hujan)',
+      advice: 'Hujan membasahi kanopi daun dan mencuci formula semprot. Tunda aplikasi hingga kanopi daun mengering pasca hujan.',
+      reasons
+    };
   }
 
-  const files = [
-    'app.py',
-    'gemini_service.py',
-    'database.py',
-    'cache_utils.py',
-    'pdf_export.py',
-    'requirements.txt',
-    '.env.example',
-    'README.md',
-    'templates/index.html',
-    'static/css/style.css',
-    'static/js/script.js',
-    'static/manifest.json',
-    'static/service-worker.js',
-  ];
+  // Risiko angin kencang (droplet drift)
+  if (windSpeed >= 16) {
+    reasons.push(`Kecepatan angin ${windSpeed} km/jam melebihi batas aman (maks 10-12 km/jam). Partikel kabut semprot akan tertiup ke luar target.`);
+    return {
+      status: 'avoid' as const,
+      title: 'Tunda Penyemprotan (Angin Terlalu Kencang)',
+      advice: 'Kecepatan angin tinggi menyebabkan droplet drift (hanyutan kabut semprot) ke lahan sekitar dan pemborosan pestisida.',
+      reasons
+    };
+  }
 
-  res.json({ files });
+  // Kondisi panas terik
+  if (temp >= 31) {
+    reasons.push(`Suhu terik siang (${temp}°C) memicu penguapan droplet sebelum sempat meresap, dan stomata daun menutup untuk menahan dehidrasi.`);
+    return {
+      status: 'caution' as const,
+      title: 'Waspada / Tunda ke Jam Teduh',
+      advice: 'Suhu lingkungan tinggi. Sebaiknya tunggu hingga menjelang sore (15.30 WIB ke atas) ketika suhu menurun dan stomata kembali terbuka.',
+      reasons
+    };
+  }
+
+  // Angin sedang atau mendung moderat
+  if (windSpeed >= 11 || rainProb >= 30) {
+    if (windSpeed >= 11) reasons.push(`Angin berembus sedang (${windSpeed} km/jam).`);
+    if (rainProb >= 30) reasons.push(`Terdapat kemungkinan awan hujan (${rainProb}%).`);
+    return {
+      status: 'caution' as const,
+      title: 'Kurang Maksimal (Semprot Ekstra Hati-Hati)',
+      advice: 'Gunakan bahan perata/penembus (adjuvant/sticker) dan semprot dengan nozel bertekanan stabil dekat kanopi tanaman searah angin.',
+      reasons
+    };
+  }
+
+  // Kondisi ideal
+  reasons.push('Kecepatan angin tenang (< 10 km/j), tidak ada potensi hujan, dan suhu mendukung bukaan stomata daun.');
+  return {
+    status: 'ideal' as const,
+    title: 'Jendela Semprot Ideal (Sangat Disarankan)',
+    advice: 'Kondisi mikroklimat optimal. Daun tanaman menyerap nutrisi dan bahan aktif secara maksimal dengan efisiensi tinggi.',
+    reasons
+  };
+}
+
+// Simple in-memory cache for fast sub-second weather responses
+const weatherCache = new Map<string, { timestamp: number; data: any }>();
+const WEATHER_CACHE_TTL = 3 * 60 * 1000; // 3 minutes
+
+// 7a. GET /api/weather/regions — Daftar sentra pertanian Indonesia
+app.get('/api/weather/regions', (_req, res) => {
+  res.json({
+    status: 'success',
+    data: INDONESIA_AGRI_REGIONS
+  });
 });
 
-// 8. GET /api/python-files/:filename — Get content of specific python file
-app.get('/api/python-files/:filename(*)', (req, res) => {
-  const filename = req.params.filename;
-  const filePath = path.join(process.cwd(), 'agri-vision', filename);
-
-  // Security check to prevent path traversal
-  if (!filePath.startsWith(path.join(process.cwd(), 'agri-vision'))) {
-    return res.status(403).json({ error: 'Access denied' });
+// 7b. GET /api/weather/search — Pencarian kecamatan / kabupaten Indonesia via geocoding
+app.get('/api/weather/search', async (req, res) => {
+  const query = (req.query.q as string || '').trim();
+  if (!query || query.length < 2) {
+    return res.status(400).json({ status: 'error', message: 'Kueri pencarian minimal 2 karakter' });
   }
 
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ error: 'File not found' });
-  }
+  try {
+    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=8&language=id&country_code=ID&format=json`;
+    const geoRes = await fetch(geoUrl);
+    if (!geoRes.ok) {
+      return res.status(502).json({ status: 'error', message: 'Gagal menghubungi server geocoding' });
+    }
+    const geoJson: any = await geoRes.json();
+    const results = (geoJson.results || []).map((item: any) => ({
+      name: item.name,
+      province: item.admin1 || 'Indonesia',
+      regency: item.admin2 || item.name,
+      latitude: item.latitude,
+      longitude: item.longitude,
+      country: item.country || 'Indonesia'
+    }));
 
-  const content = fs.readFileSync(filePath, 'utf-8');
-  res.json({ filename, content });
+    return res.json({ status: 'success', data: results });
+  } catch (err: any) {
+    return res.status(500).json({ status: 'error', message: err.message || 'Pencarian lokasi gagal' });
+  }
+});
+
+// 7c. GET /api/weather — Data cuaca riil Indonesia
+app.get('/api/weather', async (req, res) => {
+  try {
+    let lat = req.query.lat ? parseFloat(req.query.lat as string) : undefined;
+    let lng = req.query.lng ? parseFloat(req.query.lng as string) : undefined;
+    const regionId = req.query.region as string;
+    let adm4 = req.query.adm4 as string;
+    let locationName = (req.query.name as string) || '';
+    let provinceName = (req.query.province as string) || 'Indonesia';
+
+    // Jika memilih predefined region ID
+    if (regionId) {
+      const foundRegion = INDONESIA_AGRI_REGIONS.find((r) => r.id === regionId);
+      if (foundRegion) {
+        lat = foundRegion.lat;
+        lng = foundRegion.lng;
+        adm4 = foundRegion.adm4;
+        locationName = `${foundRegion.name} (${foundRegion.detail})`;
+        provinceName = foundRegion.province;
+      }
+    }
+
+    // Default ke Brebes jika tidak ada input sama sekali
+    if (lat === undefined || lng === undefined) {
+      lat = INDONESIA_AGRI_REGIONS[0].lat;
+      lng = INDONESIA_AGRI_REGIONS[0].lng;
+      adm4 = INDONESIA_AGRI_REGIONS[0].adm4;
+      locationName = `${INDONESIA_AGRI_REGIONS[0].name} (${INDONESIA_AGRI_REGIONS[0].detail})`;
+      provinceName = INDONESIA_AGRI_REGIONS[0].province;
+    }
+
+    const cacheKey = `${lat.toFixed(3)}_${lng.toFixed(3)}_${adm4 || ''}`;
+    const cached = weatherCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < WEATHER_CACHE_TTL) {
+      return res.json(cached.data);
+    }
+
+    // 1. Coba ambil dari BMKG jika adm4 tersedia
+    let bmkgData: any = null;
+    if (adm4) {
+      try {
+        const bmkgUrl = `https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=${encodeURIComponent(adm4)}`;
+        const bmkgRes = await fetch(bmkgUrl, { signal: AbortSignal.timeout(3500) });
+        if (bmkgRes.ok) {
+          const json = await bmkgRes.json();
+          if (json?.data?.[0]?.cuaca?.[0]) {
+            bmkgData = json;
+          }
+        }
+      } catch (bmkgErr) {
+        // BMKG timeout/fallback aman ke Open-Meteo Indonesian Grid
+      }
+    }
+
+    // 2. Ambil data resolusi tinggi Open-Meteo Grid Indonesia untuk probabilitas hujan per jam & angin
+    const openMeteoUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,rain,weather_code,wind_speed_10m&timezone=Asia%2FJakarta&forecast_days=2`;
+    const openMeteoRes = await fetch(openMeteoUrl, { signal: AbortSignal.timeout(5000) });
+    if (!openMeteoRes.ok) {
+      throw new Error(`Layanan cuaca mengembalikan status ${openMeteoRes.status}`);
+    }
+    const meteoJson: any = await openMeteoRes.json();
+
+    const currentMeteo = meteoJson.current || {};
+    const hourlyMeteo = meteoJson.hourly || { time: [] };
+
+    // Tentukan waktu indeks terdekat pada hourly
+    const nowIso = new Date().toISOString().substring(0, 13);
+    let startIdx = (hourlyMeteo.time || []).findIndex((t: string) => t.startsWith(nowIso));
+    if (startIdx < 0) startIdx = 0;
+
+    // Hitung rata-rata probabilitas hujan 4 jam ke depan
+    const next4HoursProb = (hourlyMeteo.precipitation_probability || []).slice(startIdx, startIdx + 4);
+    const avgRainProb = next4HoursProb.length > 0
+      ? Math.round(next4HoursProb.reduce((a: number, b: number) => a + b, 0) / next4HoursProb.length)
+      : Math.round(currentMeteo.rain ? 90 : 10);
+
+    // Integrasi BMKG jika tersedia
+    let currentTemp = Math.round((currentMeteo.temperature_2m ?? 28) * 10) / 10;
+    let currentHumidity = Math.round(currentMeteo.relative_humidity_2m ?? 75);
+    let currentWind = Math.round((currentMeteo.wind_speed_10m ?? 8) * 10) / 10;
+    let currentWindDeg = Math.round(currentMeteo.wind_direction_10m ?? 180);
+    let weatherCode = currentMeteo.weather_code ?? 2;
+    let weatherDesc = WMO_ID_MAP[weatherCode]?.text || 'Berawan';
+    let weatherIcon = WMO_ID_MAP[weatherCode]?.icon || 'cloud';
+    let dataSource = 'Satelit Cuaca Indonesia (Grid ECMWF/GFS)';
+    let bmkgIconUrl: string | undefined = undefined;
+
+    if (bmkgData) {
+      const lokasi = bmkgData.lokasi;
+      const cuacaList = bmkgData.data[0].cuaca[0];
+      if (lokasi) {
+        locationName = `${lokasi.kecamatan || lokasi.kotkab || locationName}, ${lokasi.kotkab || ''}`.trim();
+        provinceName = lokasi.provinsi || provinceName;
+      }
+      if (cuacaList && cuacaList.length > 0) {
+        const latestBmkg = cuacaList[0];
+        currentTemp = latestBmkg.t ?? currentTemp;
+        currentHumidity = latestBmkg.hu ?? currentHumidity;
+        currentWind = Math.round((latestBmkg.ws ?? currentWind) * 10) / 10;
+        weatherDesc = latestBmkg.weather_desc || weatherDesc;
+        bmkgIconUrl = latestBmkg.image;
+        dataSource = 'BMKG (Badan Meteorologi, Klimatologi, dan Geofisika Indonesia)';
+      }
+    }
+
+    const windCardinal = getDegreeToCardinalId(currentWindDeg);
+    const sprayAdvisor = calculateSprayWindow(
+      currentTemp,
+      currentHumidity,
+      currentWind,
+      avgRainProb,
+      currentMeteo.precipitation || 0,
+      weatherCode
+    );
+
+    // Siapkan forecast 8 jam ke depan
+    const hourlyForecast: any[] = [];
+    for (let i = startIdx; i < Math.min(startIdx + 8, (hourlyMeteo.time || []).length); i++) {
+      const timeStr = hourlyMeteo.time[i] || '';
+      const hourPart = timeStr.includes('T') ? timeStr.split('T')[1].substring(0, 5) : timeStr;
+      const hTemp = Math.round((hourlyMeteo.temperature_2m[i] ?? 28) * 10) / 10;
+      const hHumid = Math.round(hourlyMeteo.relative_humidity_2m[i] ?? 75);
+      const hProb = Math.round(hourlyMeteo.precipitation_probability[i] ?? 0);
+      const hWind = Math.round((hourlyMeteo.wind_speed_10m[i] ?? 8) * 10) / 10;
+      const hCode = hourlyMeteo.weather_code[i] ?? 1;
+      const hDesc = WMO_ID_MAP[hCode]?.text || 'Berawan';
+
+      hourlyForecast.push({
+        time: `${hourPart} WIB`,
+        temperature: hTemp,
+        humidity: hHumid,
+        rain_probability: hProb,
+        wind_speed: hWind,
+        weather_desc: hDesc,
+        is_safe_to_spray: hProb < 35 && hWind <= 12 && hTemp < 32
+      });
+    }
+
+    const responsePayload = {
+      status: 'success',
+      data: {
+        location: {
+          name: locationName,
+          province: provinceName,
+          latitude: lat,
+          longitude: lng,
+          data_source: dataSource,
+          station_code: adm4 || 'METEO-ID'
+        },
+        current: {
+          temperature: currentTemp,
+          apparent_temperature: Math.round((currentMeteo.apparent_temperature ?? currentTemp) * 10) / 10,
+          humidity: currentHumidity,
+          wind_speed: currentWind,
+          wind_direction_deg: currentWindDeg,
+          wind_direction_cardinal: windCardinal,
+          rain_probability_next_4h: avgRainProb,
+          precipitation_amount: currentMeteo.precipitation ?? 0,
+          cloud_cover: currentMeteo.cloud_cover ?? 50,
+          weather_desc: weatherDesc,
+          weather_icon: weatherIcon,
+          bmkg_icon_url: bmkgIconUrl,
+          is_day: Boolean(currentMeteo.is_day ?? 1),
+          updated_at: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Jakarta' }) + ' WIB'
+        },
+        spray_advisor: sprayAdvisor,
+        hourly_forecast: hourlyForecast
+      }
+    };
+
+    // Simpan ke cache
+    weatherCache.set(cacheKey, { timestamp: Date.now(), data: responsePayload });
+
+    return res.json(responsePayload);
+  } catch (error: any) {
+    console.error('[Agri-Vision] Weather API Error:', error);
+    return res.status(500).json({
+      status: 'error',
+      message: error.message || 'Gagal memuat data cuaca real-time Indonesia.'
+    });
+  }
 });
 
 // ==========================================================
@@ -770,22 +1070,42 @@ app.get('/api/python-files/:filename(*)', (req, res) => {
 // ==========================================================
 
 async function startServer() {
-  if (process.env.NODE_ENV !== 'production') {
+  const isCjsBundle = typeof __filename !== 'undefined' && __filename.endsWith('.cjs');
+  const isDevCommand = process.env.npm_lifecycle_event === 'dev';
+  const hasDist = fs.existsSync(path.join(process.cwd(), 'dist', 'index.html')) ||
+                  (typeof __dirname !== 'undefined' && fs.existsSync(path.join(__dirname, 'index.html')));
+
+  const isProduction = process.env.NODE_ENV === 'production' || isCjsBundle || (hasDist && !isDevCommand);
+
+  if (!isProduction) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
+    // Resolve absolute path to dist directory
+    const distPath = (typeof __dirname !== 'undefined' && fs.existsSync(path.join(__dirname, 'index.html')))
+      ? __dirname
+      : path.join(process.cwd(), 'dist');
+
     app.use(express.static(distPath));
+
+    const uploadsInDist = path.join(distPath, 'uploads');
+    if (fs.existsSync(uploadsInDist)) {
+      app.use('/uploads', express.static(uploadsInDist));
+    }
+
     app.get('*', (req, res) => {
+      if (req.path.startsWith('/api')) {
+        return res.status(404).json({ error: 'Endpoint API tidak ditemukan' });
+      }
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🌾 Agri-Vision Server listening on http://0.0.0.0:${PORT}`);
+    console.log(`🌾 Agri-Vision Server listening on http://0.0.0.0:${PORT} [mode: ${isProduction ? 'PRODUCTION' : 'DEVELOPMENT'}]`);
   });
 }
 

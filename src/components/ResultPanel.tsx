@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, VolumeX, Download, MessageSquare, Zap, Droplets, FlaskConical, ShieldCheck, CheckCircle2, AlertTriangle, AlertOctagon } from 'lucide-react';
+import { Volume2, VolumeX, Download, MessageSquare, Zap, Droplets, FlaskConical, ShieldCheck, CheckCircle2, AlertTriangle, AlertOctagon, Calculator, Calendar, CloudRain, ChevronDown, ChevronUp } from 'lucide-react';
 import { AnalysisRecord } from '../types';
 import jsPDF from 'jspdf';
 import confetti from 'canvas-confetti';
+import { DosageCalculator } from './DosageCalculator';
+import { TreatmentTimeline } from './TreatmentTimeline';
+import { WeatherSprayAdvisor } from './WeatherSprayAdvisor';
 
 interface ResultPanelProps {
   data: AnalysisRecord;
@@ -11,6 +14,7 @@ interface ResultPanelProps {
 
 export const ResultPanel: React.FC<ResultPanelProps> = ({ data, onOpenFeedback }) => {
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const [activeTool, setActiveTool] = useState<'none' | 'calculator' | 'timeline' | 'weather'>('none');
 
   // Trigger celebratory confetti on clean/mild diagnosis or first load
   useEffect(() => {
@@ -163,7 +167,7 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ data, onOpenFeedback }
 
       // Footer
       doc.setFontSize(8);
-      doc.text('Dihasilkan otomatis oleh Agri-Vision berbasis Google Gemini Vision API. Gunakan sebagai panduan awal budidaya.', 14, 280);
+      doc.text('Dihasilkan otomatis oleh Agri-Vision berbasis Model AI Agronomi Presisi. Gunakan sebagai panduan awal budidaya.', 14, 280);
 
       doc.save(`Laporan-AgriVision-${data.id}.pdf`);
     } catch (err) {
@@ -176,7 +180,7 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ data, onOpenFeedback }
     const kep = data.tingkat_keparahan;
     if (kep === 'Berat') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-100 text-red-700 border border-red-200">
+        <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-100">
           <AlertOctagon className="w-4 h-4" />
           <span>Tingkat Keparahan: Berat</span>
         </span>
@@ -184,14 +188,14 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ data, onOpenFeedback }
     }
     if (kep === 'Sedang') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
+        <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-100">
           <AlertTriangle className="w-4 h-4" />
           <span>Tingkat Keparahan: Sedang</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-green-100 text-green-800 border border-green-200">
+      <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-100">
         <CheckCircle2 className="w-4 h-4" />
         <span>Tingkat Keparahan: Ringan</span>
       </span>
@@ -199,17 +203,17 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ data, onOpenFeedback }
   };
 
   return (
-    <div className="bg-white rounded-2xl border-l-4 border-l-[#2E7D32] border-y border-r border-[#E2E8E2] shadow-sm p-5 sm:p-7 transition-all">
+    <div className="bg-[#FAFAF8] rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 sm:p-8 transition-all">
       {/* Header Result */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E2E8E2] pb-4 mb-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200/60 pb-5 mb-6">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wide bg-[#EFEBE9] text-[#4E342E]">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-stone-200/70 text-stone-700">
               {data.jenis_objek}
             </span>
-            <span className="text-xs text-[#5C6E61]">ID #{data.id}</span>
+            <span className="text-xs text-stone-400 font-medium">ID #{data.id}</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-[#1C281F]">
+          <h2 className="text-xl sm:text-2xl font-black text-stone-900 tracking-tight">
             {data.jenis_tanaman || 'Diagnosis Sampel'}
           </h2>
         </div>
@@ -219,7 +223,7 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ data, onOpenFeedback }
 
       {/* Cache Notification Banner */}
       {data.is_cached && (
-        <div className="mb-5 px-3.5 py-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2.5 text-xs text-amber-800 font-semibold">
+        <div className="mb-5 px-4 py-2.5 bg-amber-50/80 rounded-2xl flex items-center gap-2.5 text-xs text-amber-900 font-semibold shadow-[0_2px_10px_rgb(0,0,0,0.02)]">
           <Zap className="w-4 h-4 text-amber-600 shrink-0" />
           <span>Hasil instan dari Cache Lokal (SHA-256 gambar identik terdeteksi, hemat kuota API).</span>
         </div>
@@ -229,26 +233,26 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ data, onOpenFeedback }
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         {/* Left Column: Image & Confidence */}
         <div className="md:col-span-5 space-y-4">
-          <div className="rounded-xl overflow-hidden border border-[#D0DDD0] bg-black/5 shadow-xs">
+          <div className="rounded-2xl overflow-hidden bg-stone-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
             <img
               src={data.image_path}
               alt="Sampel yang dianalisis"
-              className="w-full max-h-64 object-cover block"
+              className="w-full max-h-64 object-cover block rounded-2xl"
             />
           </div>
 
           {/* AI Confidence Meter */}
-          <div className="bg-[#FAFDF9] border border-[#D0DDD0] rounded-xl p-3.5">
-            <div className="flex justify-between items-center text-xs font-semibold text-[#1C281F] mb-1.5">
-              <span className="flex items-center gap-1.5 text-[#2E7D32]">
+          <div className="bg-white/80 rounded-2xl p-4 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+            <div className="flex justify-between items-center text-xs font-semibold text-stone-800 mb-2">
+              <span className="flex items-center gap-1.5 text-emerald-800 font-bold">
                 <ShieldCheck className="w-4 h-4" />
                 <span>Tingkat Keyakinan AI</span>
               </span>
-              <span className="text-sm font-bold text-[#1B5E20]">{data.tingkat_keyakinan}%</span>
+              <span className="text-sm font-extrabold text-emerald-800">{data.tingkat_keyakinan}%</span>
             </div>
-            <div className="w-full h-2.5 bg-[#E0E8E0] rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-stone-200/70 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-[#66BB6A] to-[#2E7D32] transition-all duration-700 ease-out"
+                className="h-full bg-emerald-700 transition-all duration-700 ease-out rounded-full"
                 style={{ width: `${data.tingkat_keyakinan}%` }}
               ></div>
             </div>
@@ -259,41 +263,43 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ data, onOpenFeedback }
         <div className="md:col-span-7 space-y-5">
           {/* Diagnosis Block */}
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#2E7D32] mb-1">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-800 mb-1.5 flex items-center gap-1.5">
               Temuan Diagnosis
             </h3>
-            <p className="text-base text-[#1C281F] font-medium leading-relaxed bg-[#F8FAF8] p-4 rounded-xl border border-[#E2E8E2]">
-              {data.diagnosis}
-            </p>
+            <div className="bg-white/90 p-5 rounded-2xl shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+              <p className="text-base text-stone-800 font-medium leading-relaxed">
+                {data.diagnosis}
+              </p>
+            </div>
           </div>
 
           {/* Recommendations Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {/* Water Recommendation */}
-            <div className="bg-[#F0F9FF] border border-[#BAE6FD] rounded-xl p-3.5 flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+            <div className="bg-[#EEF6FB]/85 rounded-2xl p-4.5 flex items-start gap-3.5 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-sky-100/80 text-sky-800 flex items-center justify-center shrink-0">
                 <Droplets className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wide text-blue-700">Kebutuhan Air</span>
-                <p className="text-sm font-bold text-[#1C281F] mt-0.5">
-                  {data.rekomendasi_air_ml.toLocaleString()} ml <span className="text-xs font-normal text-gray-600">/ tanaman</span>
+                <span className="text-[11px] font-bold uppercase tracking-wide text-sky-900/70">Kebutuhan Air</span>
+                <p className="text-base font-extrabold text-stone-900 mt-0.5">
+                  {data.rekomendasi_air_ml.toLocaleString()} ml <span className="text-xs font-medium text-stone-500">/ tanaman</span>
                 </p>
               </div>
             </div>
 
             {/* Fertilizer Recommendation */}
-            <div className="bg-[#FDF4EB] border border-[#F8D7BE] rounded-xl p-3.5 flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[#EFEBE9] text-[#795548] flex items-center justify-center shrink-0">
+            <div className="bg-[#F6F2EB]/95 rounded-2xl p-4.5 flex items-start gap-3.5 transition-all">
+              <div className="w-10 h-10 rounded-xl bg-[#EBE3D7] text-[#6D4C41] flex items-center justify-center shrink-0">
                 <FlaskConical className="w-5 h-5" />
               </div>
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wide text-[#795548]">Rekomendasi Pupuk</span>
-                <p className="text-sm font-bold text-[#1C281F] mt-0.5">
+                <p className="text-base font-extrabold text-stone-900 mt-0.5">
                   {data.rekomendasi_pupuk?.jenis || data.rekomendasi_pupuk_jenis}
                 </p>
-                <p className="text-xs text-[#5C6E61]">
-                  Dosis: <b>{data.rekomendasi_pupuk?.takaran_gram || data.rekomendasi_pupuk_gram || 15} gram</b> / tanaman
+                <p className="text-xs text-stone-600 mt-0.5">
+                  Dosis: <span className="font-bold text-stone-800">{data.rekomendasi_pupuk?.takaran_gram || data.rekomendasi_pupuk_gram || 15} gram</span> / tanaman
                 </p>
               </div>
             </div>
@@ -301,11 +307,11 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ data, onOpenFeedback }
 
           {/* Additional Notes */}
           {data.catatan_tambahan && (
-            <div className="bg-[#FAFDF9] border border-[#D0DDD0] rounded-xl p-3.5">
+            <div className="bg-[#F9F6F0]/80 rounded-2xl p-4 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
               <h4 className="text-xs font-bold uppercase tracking-wider text-[#795548] mb-1">
                 Catatan Tindakan Lapangan
               </h4>
-              <p className="text-sm text-[#2F3E32] leading-relaxed">
+              <p className="text-sm text-stone-700 leading-relaxed">
                 {data.catatan_tambahan}
               </p>
             </div>
@@ -318,10 +324,10 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ data, onOpenFeedback }
               type="button"
               id="btn-tts-listen"
               onClick={handleToggleTTS}
-              className={`flex-1 min-w-[130px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+              className={`flex-1 min-w-[130px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold transition-all cursor-pointer ${
                 isSpeaking
-                  ? 'bg-[#2E7D32] text-white animate-pulse'
-                  : 'bg-[#F1F5F1] hover:bg-[#E8F5E9] text-[#1B5E20] border border-[#C8E6C9]'
+                  ? 'bg-emerald-800 text-white animate-pulse'
+                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800'
               }`}
             >
               {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -333,7 +339,7 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ data, onOpenFeedback }
               type="button"
               id="btn-download-pdf"
               onClick={handleDownloadPDF}
-              className="flex-1 min-w-[120px] inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#F1F5F1] hover:bg-[#E8F5E9] text-[#1B5E20] border border-[#C8E6C9] rounded-xl text-sm font-semibold transition-all cursor-pointer"
+              className="flex-1 min-w-[120px] inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-stone-100 hover:bg-stone-200/80 text-stone-800 rounded-2xl text-sm font-semibold transition-all cursor-pointer"
             >
               <Download className="w-4 h-4" />
               <span>Unduh PDF</span>
@@ -344,11 +350,150 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ data, onOpenFeedback }
               type="button"
               id="btn-give-feedback"
               onClick={onOpenFeedback}
-              className="flex-1 min-w-[120px] inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-[#FAFDF9] text-[#795548] border border-[#D7CCC8] rounded-xl text-sm font-semibold transition-all cursor-pointer"
+              className="flex-1 min-w-[120px] inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white/80 hover:bg-white text-stone-700 rounded-2xl text-sm font-semibold transition-all cursor-pointer shadow-[0_2px_8px_rgb(0,0,0,0.02)]"
             >
               <MessageSquare className="w-4 h-4" />
               <span>Beri Feedback</span>
             </button>
+          </div>
+
+          {/* ====================================================
+              FITUR TAMBAHAN AGRONOMI TERPADU
+              ==================================================== */}
+          <div className="pt-4 border-t border-stone-200/60">
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800">
+                Alat Lanjutan Agronomi Terpadu:
+              </span>
+              {activeTool !== 'none' && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTool('none')}
+                  className="text-[11px] font-bold text-stone-400 hover:text-stone-600 cursor-pointer"
+                >
+                  Tutup Panel Alat
+                </button>
+              )}
+            </div>
+
+            {/* 3 Interactive Chips */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {/* Tool 1: Kalkulator Dosis */}
+              <button
+                type="button"
+                onClick={() => setActiveTool(activeTool === 'calculator' ? 'none' : 'calculator')}
+                className={`flex items-center justify-between p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                  activeTool === 'calculator'
+                    ? 'bg-emerald-50/80 border-emerald-400 shadow-xs ring-2 ring-emerald-600/15'
+                    : 'bg-white/80 border-stone-200/70 hover:border-emerald-300 hover:bg-white'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                    <Calculator className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-stone-900">Kalkulator Lahan</p>
+                    <p className="text-[10px] text-stone-500 font-medium">Hitung tangki & pupuk</p>
+                  </div>
+                </div>
+                {activeTool === 'calculator' ? (
+                  <ChevronUp className="w-4 h-4 text-emerald-700" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-stone-400" />
+                )}
+              </button>
+
+              {/* Tool 2: Jadwal 14 Hari */}
+              <button
+                type="button"
+                onClick={() => setActiveTool(activeTool === 'timeline' ? 'none' : 'timeline')}
+                className={`flex items-center justify-between p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                  activeTool === 'timeline'
+                    ? 'bg-emerald-50/80 border-emerald-400 shadow-xs ring-2 ring-emerald-600/15'
+                    : 'bg-white/80 border-stone-200/70 hover:border-emerald-300 hover:bg-white'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                    <Calendar className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-stone-900">Jadwal 14 Hari</p>
+                    <p className="text-[10px] text-stone-500 font-medium">Protokol pemulihan</p>
+                  </div>
+                </div>
+                {activeTool === 'timeline' ? (
+                  <ChevronUp className="w-4 h-4 text-emerald-700" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-stone-400" />
+                )}
+              </button>
+
+              {/* Tool 3: Cuaca & Jendela Semprot */}
+              <button
+                type="button"
+                onClick={() => setActiveTool(activeTool === 'weather' ? 'none' : 'weather')}
+                className={`flex items-center justify-between p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                  activeTool === 'weather'
+                    ? 'bg-emerald-50/80 border-emerald-400 shadow-xs ring-2 ring-emerald-600/15'
+                    : 'bg-white/80 border-stone-200/70 hover:border-emerald-300 hover:bg-white'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-xl bg-sky-100 text-sky-800 flex items-center justify-center shrink-0">
+                    <CloudRain className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-stone-900">Cuaca & Semprot</p>
+                    <p className="text-[10px] text-stone-500 font-medium">Cek jendela aman</p>
+                  </div>
+                </div>
+                {activeTool === 'weather' ? (
+                  <ChevronUp className="w-4 h-4 text-emerald-700" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-stone-400" />
+                )}
+              </button>
+            </div>
+
+            {/* Embedded Active Tool Display */}
+            {activeTool === 'calculator' && (
+              <div className="mt-4 animate-fadeIn">
+                <DosageCalculator
+                  initialCrop={data.jenis_tanaman || 'Cabai'}
+                  initialFertilizer={data.rekomendasi_pupuk?.jenis || data.rekomendasi_pupuk_jenis || 'NPK 16-16-16'}
+                  initialDoseGram={data.rekomendasi_pupuk?.takaran_gram || data.rekomendasi_pupuk_gram || 15}
+                  initialWaterMl={data.rekomendasi_air_ml || 400}
+                  isEmbedded={true}
+                />
+              </div>
+            )}
+
+            {activeTool === 'timeline' && (
+              <div className="mt-4 animate-fadeIn">
+                <TreatmentTimeline
+                  diagnosisId={data.id}
+                  crop={data.jenis_tanaman || 'Tanaman'}
+                  diagnosisText={data.diagnosis}
+                  severity={data.tingkat_keparahan}
+                  fertilizerName={data.rekomendasi_pupuk?.jenis || data.rekomendasi_pupuk_jenis || 'NPK 16-16-16'}
+                  fertilizerGram={data.rekomendasi_pupuk?.takaran_gram || data.rekomendasi_pupuk_gram || 15}
+                  waterMl={data.rekomendasi_air_ml || 400}
+                  isEmbedded={true}
+                />
+              </div>
+            )}
+
+            {activeTool === 'weather' && (
+              <div className="mt-4 animate-fadeIn">
+                <WeatherSprayAdvisor
+                  latitude={data.latitude}
+                  longitude={data.longitude}
+                  isEmbedded={true}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

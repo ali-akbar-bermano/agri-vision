@@ -42,3 +42,45 @@ export interface PresetSample {
   description: string;
   imageUrl: string;
 }
+
+export interface WeatherData {
+  location: {
+    name: string;
+    province: string;
+    latitude: number;
+    longitude: number;
+    data_source: string;
+    station_code: string;
+  };
+  current: {
+    temperature: number;
+    apparent_temperature?: number;
+    humidity: number;
+    wind_speed: number;
+    wind_direction_deg: number;
+    wind_direction_cardinal: string;
+    rain_probability_next_4h: number;
+    precipitation_amount: number;
+    cloud_cover: number;
+    weather_desc: string;
+    weather_icon: string;
+    bmkg_icon_url?: string;
+    is_day: boolean;
+    updated_at: string;
+  };
+  spray_advisor: {
+    status: 'ideal' | 'caution' | 'avoid';
+    title: string;
+    advice: string;
+    reasons: string[];
+  };
+  hourly_forecast: Array<{
+    time: string;
+    temperature: number;
+    humidity: number;
+    rain_probability: number;
+    wind_speed: number;
+    weather_desc: string;
+    is_safe_to_spray: boolean;
+  }>;
+}

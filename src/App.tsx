@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Header } from './components/Header';
+import { Header, AppTab } from './components/Header';
 import { UploadSection } from './components/UploadSection';
 import { ResultPanel } from './components/ResultPanel';
 import { FeaturesSection } from './components/FeaturesSection';
 import { HistorySection } from './components/HistorySection';
-import { ArchitectureModal } from './components/ArchitectureModal';
 import { FeedbackModal } from './components/FeedbackModal';
+import { DosageCalculator } from './components/DosageCalculator';
+import { WeatherSprayAdvisor } from './components/WeatherSprayAdvisor';
+import { PestEncyclopedia } from './components/PestEncyclopedia';
 import { AnalysisRecord } from './types';
 import { CheckCircle, AlertCircle, RefreshCw, Sprout } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'diagnosis' | 'history' | 'code'>('diagnosis');
+  const [activeTab, setActiveTab] = useState<AppTab>('diagnosis');
   const [historyItems, setHistoryItems] = useState<AnalysisRecord[]>([]);
   const [currentAnalysis, setCurrentAnalysis] = useState<AnalysisRecord | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -19,13 +21,26 @@ export default function App() {
 
   const resultRef = useRef<HTMLDivElement>(null);
 
-  // Register PWA Service Worker
+  // Register PWA Service Worker & invalidate stale caches
   useEffect(() => {
-    if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+    if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
       navigator.serviceWorker
         .register('/service-worker.js')
-        .then((reg) => console.log('🌾 Agri-Vision PWA registered:', reg.scope))
+        .then((reg) => {
+          reg.update();
+        })
         .catch((err) => console.log('PWA registration notice:', err.message));
+
+      // Clean up legacy v1 cache if present
+      if ('caches' in window) {
+        caches.keys().then((keys) => {
+          keys.forEach((key) => {
+            if (key === 'agri-vision-v1') {
+              caches.delete(key);
+            }
+          });
+        });
+      }
     }
   }, []);
 
@@ -217,10 +232,37 @@ export default function App() {
           </div>
         )}
 
-        {/* Tab 3: Flask Localhost Architecture */}
-        {activeTab === 'code' && (
+        {/* Tab 3: Ensiklopedia Hama & Penyakit */}
+        {activeTab === 'encyclopedia' && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <PestEncyclopedia
+              onSelectDiseaseForCalculator={(crop, disease) => {
+                setActiveTab('calculator');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            />
+          </div>
+        )}
+
+        {/* Tab 4: Kalkulator Dosis Lahan & Tangki Semprot */}
+        {activeTab === 'calculator' && (
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            <ArchitectureModal />
+            <DosageCalculator
+              initialCrop={currentAnalysis?.jenis_tanaman || 'Cabai'}
+              initialFertilizer={currentAnalysis?.rekomendasi_pupuk?.jenis || currentAnalysis?.rekomendasi_pupuk_jenis || 'NPK 16-16-16'}
+              initialDoseGram={currentAnalysis?.rekomendasi_pupuk?.takaran_gram || currentAnalysis?.rekomendasi_pupuk_gram || 15}
+              initialWaterMl={currentAnalysis?.rekomendasi_air_ml || 400}
+            />
+          </div>
+        )}
+
+        {/* Tab 5: Cuaca Lahan & Waktu Ideal Semprot */}
+        {activeTab === 'weather' && (
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <WeatherSprayAdvisor
+              latitude={currentAnalysis?.latitude}
+              longitude={currentAnalysis?.longitude}
+            />
           </div>
         )}
       </main>
@@ -246,7 +288,7 @@ export default function App() {
               </div>
               <div>
                 <span className="font-extrabold text-xl tracking-tight text-white">
-                  Agri<span className="text-emerald-400">Vision</span>
+                  Mata<span className="text-emerald-400">Tani</span>
                 </span>
                 <p className="text-[11px] text-emerald-200/60 font-medium -mt-0.5">
                   Smart Precision Agriculture & Agronomy AI
@@ -255,7 +297,7 @@ export default function App() {
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-emerald-200/70">
-              <span>Gemini Vision AI</span>
+              <span>AI Agronomi Presisi</span>
               <span>•</span>
               <span>Client Canvas Compression</span>
               <span>•</span>
@@ -267,7 +309,7 @@ export default function App() {
             </div>
 
             <p className="text-xs text-emerald-200/60 text-center sm:text-right">
-              © 2026 Agri-Vision. Ketahanan Pangan & Pertanian Berkelanjutan.
+              © 2026 MataTani. Ketahanan Pangan & Pertanian Berkelanjutan.
             </p>
           </div>
         </div>
