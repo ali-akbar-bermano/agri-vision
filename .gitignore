@@ -6,3 +6,16 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+instance/
+.pytest_cache/
+
+# Uploads (user-generated, don't commit)
+public/uploads/

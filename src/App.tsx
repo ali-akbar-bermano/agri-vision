@@ -44,21 +44,38 @@ export default function App() {
     }
   }, []);
 
-  // Fetch initial history from API
+  // Fetch initial history from API or LocalStorage (for GitHub Pages static mode)
   const fetchHistory = async () => {
     try {
       const res = await fetch('/api/history');
       if (res.ok) {
         const json = await res.json();
-        if (json.data) {
+        if (json.data && json.data.length > 0) {
           setHistoryItems(json.data);
-          if (!currentAnalysis && json.data.length > 0) {
+          if (!currentAnalysis) {
             setCurrentAnalysis(json.data[0]);
+          }
+          return;
+        }
+      }
+    } catch {
+      // Offline / GitHub Pages static mode
+    }
+
+    // LocalStorage fallback for GitHub Pages
+    try {
+      const local = localStorage.getItem('agrivision_history');
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setHistoryItems(parsed);
+          if (!currentAnalysis) {
+            setCurrentAnalysis(parsed[0]);
           }
         }
       }
     } catch (err) {
-      console.warn('Gagal memuat riwayat awal:', err);
+      console.warn('Gagal membaca localStorage riwayat:', err);
     }
   };
 
@@ -83,46 +100,72 @@ export default function App() {
     setNotification(null);
 
     try {
-      const formData = new FormData();
-      if (typeof payload.blobOrBase64 === 'string') {
-        formData.append('image', payload.blobOrBase64);
-      } else {
-        formData.append('image', payload.blobOrBase64, payload.fileName || 'upload.jpg');
+      let record: AnalysisRecord | null = null;
+
+      // 1. Coba panggil Backend API jika tersedia
+      try {
+        const formData = new FormData();
+        if (typeof payload.blobOrBase64 === 'string') {
+          formData.append('image', payload.blobOrBase64);
+        } else {
+          formData.append('image', payload.blobOrBase64, payload.fileName || 'upload.jpg');
+        }
+
+        if (payload.crop) {
+          formData.append('jenis_tanaman', payload.crop);
+        }
+        if (payload.latitude) {
+          formData.append('latitude', payload.latitude.toString());
+        }
+        if (payload.longitude) {
+          formData.append('longitude', payload.longitude.toString());
+        }
+
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.status === 'success' && result.data) {
+            record = result.data;
+          }
+        }
+      } catch (backendErr) {
+        console.warn('Backend API tidak terjangkau (Mode GitHub Pages / Statis):', backendErr);
       }
 
-      if (payload.crop) {
-        formData.append('jenis_tanaman', payload.crop);
-      }
-      if (payload.latitude) {
-        formData.append('latitude', payload.latitude.toString());
-      }
-      if (payload.longitude) {
-        formData.append('longitude', payload.longitude.toString());
-      }
-
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (!response.ok || result.status !== 'success') {
-        throw new Error(result.message || 'Gagal memproses analisis gambar.');
+      // 2. Jika di GitHub Pages (tidak ada backend) atau API gagal, gunakan Client Agronomy Engine
+      if (!record) {
+        const { analyzePlantClientSide } = await import('./clientAgronomyService');
+        record = analyzePlantClientSide(
+          payload.crop,
+          payload.previewUrl,
+          payload.latitude,
+          payload.longitude
+        );
       }
 
-      const record: AnalysisRecord = result.data;
       if (payload.previewUrl && !record.image_path.startsWith('http')) {
         record.image_path = payload.previewUrl;
       }
 
       setCurrentAnalysis(record);
-      setHistoryItems((prev) => [record, ...prev.filter((i) => i.id !== record.id)]);
+      setHistoryItems((prev) => {
+        const updated = [record!, ...prev.filter((i) => i.id !== record!.id)];
+        try {
+          localStorage.setItem('agrivision_history', JSON.stringify(updated.slice(0, 30)));
+        } catch {
+          // ignore
+        }
+        return updated;
+      });
 
       showToast(
         record.is_cached
           ? 'Hasil diambil langsung dari Cache (Gambar identik terdeteksi).'
-          : 'Diagnosis AI Vision berhasil diselesaikan!',
+          : 'Diagnosis AI Agronomi berhasil diselesaikan!',
         'success'
       );
 
